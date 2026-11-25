@@ -1,0 +1,22 @@
+<?php
+
+namespace App\Filament\Resources\Collections\Pages;
+
+use App\Filament\Resources\Collections\CollectionResource;
+use Filament\Actions\ViewAction;
+use Filament\Resources\Pages\EditRecord;
+
+class EditCollection extends EditRecord
+{
+    protected static string $resource = CollectionResource::class;
+
+    protected function getHeaderActions(): array
+    {
+        return [ViewAction::make()];
+    }
+
+    protected function mutateFormDataBeforeSave(array $data): array
+    {
+        return CollectionResource::prepareCover($data);
+    }
+}

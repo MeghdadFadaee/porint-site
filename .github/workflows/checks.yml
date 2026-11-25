@@ -1,0 +1,41 @@
+name: Checks
+
+on: [push, pull_request]
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: gd, intl, pdo_sqlite, xml, xmlwriter
+          tools: composer:v2
+          coverage: none
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '22'
+          cache: npm
+
+      - run: composer validate --strict
+      - run: cp .env.example .env
+      - run: composer install --no-interaction --prefer-dist --no-progress
+      - run: |
+          php artisan key:generate
+          touch database/database.sqlite
+          php artisan migrate --seed
+          php artisan filament:assets
+      - run: php artisan test
+      - run: npm ci
+      - run: npm run check
+      - run: npm run build

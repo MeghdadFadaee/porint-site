@@ -1,0 +1,33 @@
+.porint-wordmark {
+    display: inline-block;
+    position: relative;
+    isolation: isolate;
+    direction: ltr;
+    font-style: italic;
+    font-weight: 950;
+    letter-spacing: -.075em;
+    line-height: 1.35;
+}
+
+.porint-wordmark::before {
+    content: '';
+    position: absolute;
+    inset: 2px 0 auto 32%;
+    height: .43em;
+    border-top: 3px solid var(--porint-wordmark-accent, #a91d38);
+    border-radius: 50%;
+    transform: rotate(-6deg) translateY(-38%);
+}
+
+.fi-logo > .porint-wordmark {
+    align-self: center;
+    font-size: 1.75rem;
+}
+
+.dark .fi-logo > .porint-wordmark {
+    --porint-wordmark-accent: #ff8793;
+}
+
+.fi-topbar .fi-topbar-start {
+    display: flex;
+}

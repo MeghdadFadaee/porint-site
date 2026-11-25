@@ -1,0 +1,12 @@
+{
+    "(and :count more error)": "(و :count خطای دیگر)",
+    "(and :count more errors)": "(و :count خطای دیگر)",
+    "Forbidden": "دسترسی به این بخش مجاز نیست",
+    "Not Found": "صفحه پیدا نشد",
+    "Page Expired": "اعتبار صفحه به پایان رسیده است",
+    "Server Error": "خطای سرور",
+    "Service Unavailable": "سرویس در دسترس نیست",
+    "The given data was invalid.": "اطلاعات واردشده معتبر نیست.",
+    "Too Many Requests": "تعداد درخواست‌ها بیش از حد مجاز است",
+    "Unauthorized": "ورود به حساب کاربری لازم است"
+}
