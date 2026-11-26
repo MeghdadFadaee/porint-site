@@ -165,19 +165,79 @@ class PorintStudioTest extends TestCase
         $this->get($previewArt)->assertForbidden();
 
         $staff = User::factory()->create(['is_staff' => true]);
-        $this->actingAs($staff)->get($preview)->assertOk()->assertSee('noindex, nofollow');
-        $this->get($previewArt)->assertOk()->assertHeader('Content-Type', 'image/webp')->assertHeader('Cache-Control', 'no-store, private');
+        $this->actingAs($staff)->get($preview)->assertOk()
+            ->assertHeader('X-Robots-Tag', 'noindex, nofollow')
+            ->assertSee('name="robots" content="noindex, nofollow"', escape: false)
+            ->assertDontSee('property="og:image"', escape: false)
+            ->assertDontSee('rel="canonical"', escape: false);
+        $this->get($previewArt)->assertOk()
+            ->assertHeader('X-Robots-Tag', 'noindex, nofollow')
+            ->assertHeader('Content-Type', 'image/webp')
+            ->assertHeader('Cache-Control', 'no-store, private');
+    }
+
+    public function test_robots_advertises_the_canonical_sitemap_without_starting_a_session(): void
+    {
+        config(['app.url' => 'https://porint.example/']);
+
+        $this->get('http://preview.example/robots.txt')
+            ->assertOk()
+            ->assertHeader('Content-Type', 'text/plain; charset=UTF-8')
+            ->assertHeaderMissing('Set-Cookie')
+            ->assertContent("User-agent: *\nDisallow:\n\nSitemap: https://porint.example/sitemap.xml\n");
+    }
+
+    public function test_login_and_health_check_tell_crawlers_to_exclude_them(): void
+    {
+        $this->get(route('filament.studio.auth.login'))->assertOk()->assertHeader('X-Robots-Tag', 'noindex, nofollow');
+        $this->get('/up')->assertOk()->assertHeader('X-Robots-Tag', 'noindex, nofollow');
+        $this->get('/')->assertOk()->assertHeaderMissing('X-Robots-Tag');
     }
 
     public function test_sitemap_is_valid_xml_with_each_published_locale(): void
     {
+        config(['app.url' => 'https://porint.example']);
         $design = Design::firstOrFail();
-        $response = $this->get('/sitemap.xml')->assertOk()->assertHeaderMissing('Set-Cookie');
+
+        $response = $this->get('http://preview.example/sitemap.xml')->assertOk()->assertHeaderMissing('Set-Cookie');
+
         $xml = simplexml_load_string($response->getContent());
         $this->assertNotFalse($xml);
         $links = array_map('strval', $xml->xpath('//*[local-name()="loc"]'));
-        $this->assertContains(route('fa.design', $design->slug_fa), $links);
-        $this->assertContains(route('en.design', $design->slug_en), $links);
+        $this->assertContains('https://porint.example/designs/'.rawurlencode($design->slug_fa), $links);
+        $this->assertContains('https://porint.example/en/designs/'.$design->slug_en, $links);
+        $this->assertContains('https://porint.example/', $links);
+        $response->assertDontSee('preview.example');
+    }
+
+    public function test_design_metadata_uses_localized_canonical_urls_and_the_public_artwork(): void
+    {
+        config(['app.url' => 'https://porint.example']);
+        $design = Design::firstOrFail();
+        $english = 'https://porint.example/en/designs/'.$design->slug_en;
+        $persian = 'https://porint.example/designs/'.rawurlencode($design->slug_fa);
+        $artwork = 'https://porint.example/artwork/'.$design->id.'/'.basename($design->artwork_path);
+
+        $response = $this->get('http://preview.example/en/designs/'.$design->slug_en.'?ref=share')->assertOk();
+        $document = HTMLDocument::createFromString($response->getContent(), LIBXML_NOERROR);
+
+        $this->assertSame($english, $document->querySelector('link[rel="canonical"]')->getAttribute('href'));
+        $this->assertSame($english, $document->querySelector('link[hreflang="en"]')->getAttribute('href'));
+        $this->assertSame($persian, $document->querySelector('link[hreflang="fa"]')->getAttribute('href'));
+        $this->assertSame($persian, $document->querySelector('link[hreflang="x-default"]')->getAttribute('href'));
+        $this->assertSame('http://preview.example/designs/'.rawurlencode($design->slug_fa), $document->querySelector('a.language')->getAttribute('href'));
+        $this->assertSame($english, $document->querySelector('meta[property="og:url"]')->getAttribute('content'));
+        $this->assertSame($artwork, $document->querySelector('meta[property="og:image"]')->getAttribute('content'));
+        $this->assertSame($design->name_en, $document->querySelector('meta[property="og:image:alt"]')->getAttribute('content'));
+
+        $schema = json_decode($document->querySelector('script[type="application/ld+json"]')->textContent, true, flags: JSON_THROW_ON_ERROR);
+        $this->assertSame('BreadcrumbList', $schema['@type']);
+        $this->assertSame([
+            'https://porint.example/en',
+            'https://porint.example/en/collections',
+            'https://porint.example/en/collections/'.$design->collection->slug_en,
+            $english,
+        ], array_column($schema['itemListElement'], 'item'));
     }
 
     public function test_the_static_guide_has_localized_metadata_and_redirects_legacy_links(): void

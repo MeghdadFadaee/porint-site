@@ -1,14 +1,5 @@
 @extends('studio.layout')
 
-@push('head')
-    <meta property="og:type" content="article">
-    <meta property="og:title" content="{{ $title }} · PORINT">
-    <meta property="og:description" content="{{ $description }}">
-    <meta property="og:url" content="{{ $alternates[$locale] }}">
-    <meta property="og:image" content="{{ asset('porint/guide-workbench.webp') }}">
-    <meta property="og:image:alt" content="{{ __('guide.hero_alt') }}">
-@endpush
-
 @section('content')
     <article class="print-guide">
         <header class="guide-hero">

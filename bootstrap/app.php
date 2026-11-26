@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\NoIndexStudio;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -14,6 +15,7 @@ return Application::configure(basePath: dirname(__DIR__))
         then: fn () => Route::group([], base_path('routes/studio.php')),
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        $middleware->append(NoIndexStudio::class);
         $middleware->redirectGuestsTo(fn () => route('filament.studio.auth.login'));
     })
     ->withExceptions(function (Exceptions $exceptions): void {

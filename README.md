@@ -68,6 +68,7 @@ GitHub Actions runs the tests, TypeScript checks, and the Vite build for pushes 
 ## Deployment and redistribution
 
 - Serve the `public/` directory over HTTPS. Set `APP_ENV=production`, `APP_DEBUG=false`, `APP_URL` to the canonical HTTPS origin, and `SESSION_SECURE_COOKIE=true` in the server environment.
+- Permanently redirect HTTP and alternate hostnames to the canonical HTTPS origin. Route `/robots.txt` and `/sitemap.xml` through Laravel, including on Nginx deployments with an exact-match `/robots.txt` location. After deployment, verify both URLs on the public domain and submit `/sitemap.xml` in Google Search Console.
 - Install the locked dependencies and build Vite assets. Run `php artisan filament:assets` to publish Filament's generated assets and `php artisan migrate --force` to apply the schema. Use `php artisan migrate --seed` for a local demo.
 - Keep the SQLite database and `storage/app/private` outside the web root. Back them up with the application key. The staff panel uses authenticated sessions. Configure server and CDN access logs to follow the visitor-data policy.
 - `public/porint` and `database/seeders/artwork` contain the imagery needed to run the demo. Review redistribution rights for the supplied collection sheets and their derivatives before publishing the repository. Keep working originals and generated concepts in local storage.

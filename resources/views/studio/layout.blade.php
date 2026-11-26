@@ -12,8 +12,22 @@
         @foreach ($alternates as $language => $url)
             <link rel="alternate" hreflang="{{ $language }}" href="{{ $url }}">
         @endforeach
+        <link rel="alternate" hreflang="x-default" href="{{ $alternates['fa'] }}">
+        <meta name="robots" content="max-image-preview:large">
+        <meta property="og:type" content="{{ $shareType ?? 'website' }}">
+        <meta property="og:site_name" content="PORINT">
+        <meta property="og:title" content="{{ $title }} · PORINT">
+        <meta property="og:description" content="{{ $description }}">
+        <meta property="og:url" content="{{ $alternates[$locale] }}">
+        <meta property="og:locale" content="{{ $locale === 'fa' ? 'fa_IR' : 'en_US' }}">
+        <meta property="og:locale:alternate" content="{{ $locale === 'fa' ? 'en_US' : 'fa_IR' }}">
+        <meta property="og:image" content="{{ $shareImage }}">
+        <meta property="og:image:alt" content="{{ $shareImageAlt }}">
+        <meta name="twitter:card" content="summary">
+        @if ($structuredData)
+            <script type="application/ld+json">{!! \Illuminate\Support\Js::encode($structuredData, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) !!}</script>
+        @endif
     @endif
-    @stack('head')
     <link rel="preload" href="{{ asset('fonts/vazirmatn.woff2') }}" as="font" type="font/woff2" crossorigin>
     <link rel="stylesheet" href="{{ asset('fonts/studio-font.css') }}">
     <link rel="stylesheet" href="{{ asset('porint/wordmark.css') }}">
@@ -29,7 +43,7 @@
                 <a href="{{ route($locale.'.catalog') }}">{{ __('studio.catalog') }}</a>
                 <a href="{{ route($locale.'.guides') }}">{{ __('studio.guides') }}</a>
             </nav>
-            <a class="language" lang="{{ $alternateLocale }}" hreflang="{{ $alternateLocale }}" href="{{ $alternates[$alternateLocale] }}">{{ __('studio.language') }}</a>
+            <a class="language" lang="{{ $alternateLocale }}" hreflang="{{ $alternateLocale }}" href="{{ $languageSwitchUrl }}">{{ __('studio.language') }}</a>
         </div>
     </header>
     <main id="content">

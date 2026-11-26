@@ -25,4 +25,5 @@ Route::get('/collection-covers/{id}/{file}', [StudioController::class, 'collecti
     ->whereNumber('id')->name('collection.cover');
 Route::get('/garment-photos/{id}/{file}', [StudioController::class, 'garmentPhoto'])
     ->whereNumber('id')->name('garment.photo');
+Route::get('/robots.txt', [StudioController::class, 'robots'])->name('robots');
 Route::get('/sitemap.xml', [StudioController::class, 'sitemap'])->name('sitemap');

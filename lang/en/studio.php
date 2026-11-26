@@ -2,7 +2,10 @@
 
 return [
     'titles' => ['home' => 'Heat-transfer designs for clothing', 'catalog' => 'Heat-transfer collections'],
-    'description' => 'Explore PORINT’s heat-transfer designs, see your favorite motifs on clothes, and learn how to apply and care for them.',
+    'descriptions' => [
+        'home' => 'Explore PORINT’s heat-transfer designs, see your favorite motifs on clothes, and learn how to apply and care for them.',
+        'catalog' => 'Browse PORINT’s heat-transfer collections, from Rose & Thorn to Sound Wave, and preview individual designs on T-shirts, hoodies, and more.',
+    ],
     'catalog' => 'Collections',
     'guides' => 'Print guide',
     'language' => 'فارسی',
